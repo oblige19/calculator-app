@@ -1,77 +1,75 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 
-class CalculatorKeys extends Component {
+const CalculatorKeys = ({onDisplayChange}) => {
+    const [display, setDisplay] = useState('0');
+    const [previousKey, setPreviousKey] = useState('');
+    const [operator, setOperator] = useState('');
+    const [previousDisplay, setPreviousDisplay] = useState('');
 
-    state = {
-        display: '0',
-        previousKey: '',
-        operator: '',
-        previousDisplay: ''
+    const operators = ['+', '-', '*', '/'];
+
+    const handleDisplayChange = () => {
+        onDisplayChange(display);
     }
 
-    operators = ['+', '-', '*', '/'];
-
-    handleDisplayChange = () => {
-        this.props.onDisplayChange(this.state.display);
-    }
-
-    handleOperatorEventKey = (element) => {
+    const handleOperatorEventKey = element => {
         const action = element.target.value;
-        let {previousKey, operator, previousDisplay, display} = this.state;
-        const isPreviousKeyOperator = this.operators.filter(op => op === previousKey).length;
-        if (isPreviousKeyOperator) {
-            this.setState({...this.state, operator: action, previousKey: action});
-        } else {
+        const isPreviousKeyOperator = operators.filter(op => op === previousKey).length;
+
+        if (!isPreviousKeyOperator) {
             if (previousKey !== '' && previousDisplay !== '' && operator !== '') {
-                const newDisplay = this.calculate(previousDisplay, operator, display);
-                this.setState(
-                    {...this.state, display: newDisplay, previousDisplay: display, operator: action, previousKey: action}, 
-                    () => this.handleDisplayChange()
-                );
+                const newDisplay = calculate(previousDisplay, operator, display);
+
+                setDisplay(newDisplay);
+                setPreviousDisplay(display);
+                handleDisplayChange();
             } else {
-                this.setState({...this.state, previousDisplay: display, operator: action, previousKey: action});
+                setPreviousDisplay(display);
             }
         }
+        setOperator(action);
+        setPreviousKey(action);
     }
 
-    handleNumberEventKey = element => {
+    const handleNumberEventKey = element => {
         const value = element.target.value;
-        let {display, previousKey} = this.state;
-        const isPreviousKeyOperator = this.operators.filter(op => op === previousKey).length;
+        const isPreviousKeyOperator = operators.filter(op => op === previousKey).length;
         
         if (isPreviousKeyOperator || display === '0') {
-            display = value;
+            setDisplay(value);
         } else {
-            display += value;
+            setDisplay(display + value);
         }
 
-        this.setState({...this.state, display: display, previousKey: value}, () => this.handleDisplayChange());
+        setPreviousKey(value);
     }
 
-    handleDecimalEventKey = (element) => {
+    const handleDecimalEventKey = element => {
         const value = element.target.value;
-        if (!this.state.display.includes(value)) {
-            this.setState({display: this.state.display + value, previousKey: value}, () => this.handleDisplayChange());
+        if (!display.includes(value)) {
+            setDisplay(display + value);
+            setPreviousKey(value);
         }
     }
 
-    handleClearEventKey = (element) => {
-        this.setState({display: '0', previousDisplay: '', operator: '', previousKey: ''}, () => this.handleDisplayChange());
+    const handleClearEventKey = () => {
+        setDisplay('0');
+        setPreviousKey('');
+        setOperator('');
+        setPreviousDisplay('');
     }
 
-    handleEqualsEventKey = () => {
-        const {display, previousDisplay, operator} = this.state;
-        console.log('state',this.state);
+    const handleEqualsEventKey = () => {
         if (display !== '0' && previousDisplay !== '' && operator !== '') {
-            const newDisplay = this.calculate(previousDisplay, operator, display);
-            this.setState(
-                {...this.state, display: newDisplay, previousDisplay: '' , operator: '', previousKey: ''}, 
-                () => this.handleDisplayChange()
-            );
+            const newDisplay = calculate(previousDisplay, operator, display);
+            setDisplay(newDisplay);
+            setPreviousDisplay('');
+            setOperator('');
+            setPreviousKey('');
         }
     }
 
-    calculate = (num1, operator, num2) => {
+    const calculate = (num1, operator, num2) => {
         const firstNum = parseFloat(num1); 
         const secNum = parseFloat(num2);
 
@@ -81,42 +79,42 @@ class CalculatorKeys extends Component {
         if (operator === '/') return firstNum / secNum;
     }
 
-    keys = [
-        { label: "+", value: "+", handler: this.handleOperatorEventKey, className: "key-operator"},
-        { label: "-", value: "-", handler: this.handleOperatorEventKey, className: "key-operator"},
-        { label: "×", value: "*", handler: this.handleOperatorEventKey, className: "key-operator"},
-        { label: "÷", value: "/", handler: this.handleOperatorEventKey, className: "key-operator"},
-        { label: "7", value: "7", handler: this.handleNumberEventKey},
-        { label: "8", value: "8", handler: this.handleNumberEventKey},
-        { label: "9", value: "9", handler: this.handleNumberEventKey},
-        { label: "4", value: "4", handler: this.handleNumberEventKey},
-        { label: "5", value: "5", handler: this.handleNumberEventKey},
-        { label: "6", value: "6", handler: this.handleNumberEventKey},
-        { label: "1", value: "1", handler: this.handleNumberEventKey},
-        { label: "2", value: "2", handler: this.handleNumberEventKey},
-        { label: "3", value: "3", handler: this.handleNumberEventKey},
-        { label: "0", value: "0", handler: this.handleNumberEventKey},
-        { label: ".", value: ".", handler: this.handleDecimalEventKey},
-        { label: "AC", value: "clear", handler: this.handleClearEventKey},
-        { label: "=", value: "calc", handler: this.handleEqualsEventKey, className: "key-equal"}
+    const keys = [
+        { label: "+", value: "+", handler: handleOperatorEventKey, className: "key-operator"},
+        { label: "-", value: "-", handler: handleOperatorEventKey, className: "key-operator"},
+        { label: "×", value: "*", handler: handleOperatorEventKey, className: "key-operator"},
+        { label: "÷", value: "/", handler: handleOperatorEventKey, className: "key-operator"},
+        { label: "7", value: "7", handler: handleNumberEventKey},
+        { label: "8", value: "8", handler: handleNumberEventKey},
+        { label: "9", value: "9", handler: handleNumberEventKey},
+        { label: "4", value: "4", handler: handleNumberEventKey},
+        { label: "5", value: "5", handler: handleNumberEventKey},
+        { label: "6", value: "6", handler: handleNumberEventKey},
+        { label: "1", value: "1", handler: handleNumberEventKey},
+        { label: "2", value: "2", handler: handleNumberEventKey},
+        { label: "3", value: "3", handler: handleNumberEventKey},
+        { label: "0", value: "0", handler: handleNumberEventKey},
+        { label: ".", value: ".", handler: handleDecimalEventKey},
+        { label: "AC", value: "clear", handler: handleClearEventKey},
+        { label: "=", value: "calc", handler: handleEqualsEventKey, className: "key-equal"}
     ];
+    
+    useEffect(() => handleDisplayChange(), [display]);
 
-    render() { 
-        return (
-            <div className="calculator-keys">
-                { this.keys.map(key => 
-                    <button className={key.className} 
-                            value={key.value}
-                            key={key.label}
-                            onClick={ key.handler }
-                            >
-                        {key.label}
-                    </button>
-                    )
-                }
-            </div>
-        );
-    }
+    return (
+        <div className="calculator-keys">
+            { keys.map(key => 
+                <button className={key.className} 
+                        value={key.value}
+                        key={key.label}
+                        onClick={ key.handler }
+                        >
+                    {key.label}
+                </button>
+                )
+            }
+        </div>
+    );
 }
  
 export default CalculatorKeys;

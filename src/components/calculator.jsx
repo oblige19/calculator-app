@@ -1,26 +1,21 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import CalculatorDisplay from './calculator-display';
 import CalculatorKeys from './calculator-keys';
 
-class Calculator extends React.Component {
+const Calculator = () => {
+    const [display, setDisplay] = useState('0');
 
-    state = {
-        display: '0'
+
+    const handleDisplay = (display) => {
+        setDisplay(display);
     }
 
-    handleDisplay = (display) => {
-        this.setState({display});
-    }
-
-    render() { 
-        const {display} = this.state; 
-        return (
-            <div>
-                <CalculatorDisplay displayData={display} />
-                <CalculatorKeys onDisplayChange={this.handleDisplay}  />
-            </div>
-        );
-    }
+    return (
+        <div>
+            <CalculatorDisplay displayData={display} />
+            <CalculatorKeys onDisplayChange={handleDisplay}  />
+        </div>
+    );
 }
  
 export default Calculator;
